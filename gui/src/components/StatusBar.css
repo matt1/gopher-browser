@@ -1,0 +1,17 @@
+.statusBar {
+
+  bottom: 0;
+  padding: 2px 8px 2px 5px;
+  position:absolute;
+  background-color: black;
+  color:beige;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.visible {
+  opacity: 1;
+}
+
+.invisible {
+  opacity: 0;
+}

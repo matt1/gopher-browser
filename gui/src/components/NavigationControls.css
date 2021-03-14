@@ -1,0 +1,25 @@
+.navigationControls {
+  grid-area: header-grid;
+  display: grid;
+  grid-template-columns: max-content auto max-content;
+  grid-template-rows: 1fr;
+  grid-template-areas: "left-grid middle-grid right-grid";
+}
+
+.left {
+  grid-area: left-grid;
+}
+
+.middle {
+  grid-area: middle-grid;
+  display: flex;
+}
+
+.right {
+  grid-area: right-grid;
+}
+
+
+.address input {
+  width: 90%;
+}

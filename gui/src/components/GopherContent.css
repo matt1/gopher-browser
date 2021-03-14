@@ -1,0 +1,33 @@
+/** Root theme variables. */
+/* Theme can be set using ...setAttribute('data-theme', 'dark') */
+.gopherContent{
+  /** Colours */
+  --background: #fff;
+  --foreground: #000;
+  --link: blue;
+
+  /** Padding */
+  --content-padding: 1rem;
+}
+
+.gopherContent[data-theme="dark"] {
+  --background: #000;
+  --foreground: #fff;
+  --link: #4caf50;
+}
+
+
+.gopherContent {
+  /** Themed elements */
+  background-color: var(--background);
+  color: var(--foreground);
+  padding: var(--content-padding);
+
+  grid-area: content-grid;
+  overflow: auto;
+}
+
+.gopherContent .gopherLink .name {
+  color: var(--link);
+}
+

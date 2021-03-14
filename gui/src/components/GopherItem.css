@@ -1,0 +1,26 @@
+div.gopherItem {
+  display: grid;
+  font-family: monospace;
+  font-size: 16px;
+  padding: 0.05em;
+  grid-template-rows: 1fr;
+  grid-template-columns: 100px auto;
+  grid-template-areas: "type-grid item-grid";
+  white-space: pre;
+}
+
+div.type {
+  grid-area: type-grid;
+}
+
+div.type, div.name, div.selector, div.hostname, div.port {
+  display: inline-block;
+}
+
+div.name {
+  grid-area: item-grid;
+}
+
+div.name.i {
+  white-space: pre;
+}
