@@ -131,8 +131,6 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     this._navigate(selector)
   }
 
-  
-
   _navigate(selector:GopherSelector) {
     const host = document.location.hostname;
     let path = `http://${host}:7070/api/v1/downloadMenu`;
@@ -143,13 +141,11 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
       path = `http://${host}:7070/api/v1/search`
     }
 
-    
     this.setState({
       uri: selector.toString(),
       selector,
       status: `Waiting for ${selector.hostname}...`,
     });
-    
 
     fetch(path, {
       method: 'POST',
@@ -173,8 +169,8 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
         });
       }
     }).catch((error) => {
-      console.log(error);      
-      this.setState({status: ''});      
+      console.log(error);
+      this.setState({status: ''});
     });
   }
 

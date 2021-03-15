@@ -1,0 +1,245 @@
+:root {
+  /** Base values */
+  --base-font-family: Arial, Helvetica, sans-serif;
+  --base-font-size: 1rem;
+  --base-icon-scaling: 0.9;
+
+  --base-colour-active: #ffffff;
+  --base-colour-background-primary: #ffffff;
+  --base-colour-background-secondary: #efefef;
+  --base-colour-border: #bdbdbd;
+  --base-colour-focus: #1e88e5;
+  --base-colour-foreground: #000000;
+  
+  /** Common borders etc */
+  --border-radius: 0;
+  --border-colour: var(--base-colour-border);
+  --border-colour-focus: var(--base-colour-focus);
+  --border: 1px solid var(--border-colour);
+  --border-focus: 1px solid var(--border-colour-focus);
+  --box-shadow: 0px 0px 1px 1px rgba(0,0,0,.15);
+
+  /** Common paddings etc */
+  --base-padding-top: 0.2rem;
+  --base-padding-side: 0.5rem;
+  --base-padding: var(--base-padding-top) var(--base-padding-side);
+
+  /** Buttons */
+  --button-font-size: var(--base-font-size);
+  --button-icon-size: calc(var(--button-font-size) * var(--base-icon-scaling));
+
+  /** Inputs */
+  --input-background-colour: #ffffff;
+  --input-font-size: var(--base-font-size);
+  --input-icon-size: calc(var(--input-font-size) * var(--base-icon-scaling));
+
+  /** Tabs */
+  --tab-font-size: var(--base-font-size);
+  --tab-icon-size: calc(var(--tab-font-size) * var(--base-icon-scaling));
+  --tab-icon-padding: calc(var(--tab-font-size) * 0.5);
+  --tab-padding: calc(var(--base-font-size) * 0.3);
+
+  /** Menus  */
+  --menu-font-size: var(--base-font-size);
+  --menu-button-font-size:calc(var(--base-font-size) * 1);
+
+  /** Set default values. */
+  background-color: var(--base-colour-background-primary);
+  color: var(--base-colour-foreground);
+  font-family: var(--base-font-family);
+  font-size: var(--base-font-size);
+}
+
+*[data-theme="dark"] {
+  --base-colour-active: ##272727;
+  --base-colour-background-primary: #000;
+  --base-colour-background-secondary: #333232;
+  --base-colour-border: #242424;
+  --base-colour-focus: #389261;
+  --base-colour-foreground: #fff;
+  --input-background-colour: #929292;
+}
+
+*:focus {
+  border: var(--border-focus);
+  box-shadow: var(--box-shadow);
+}
+
+button {
+  background-color: var(--base-colour-background-secondary);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  color: var(--base-colour-foreground);
+  cursor: pointer;
+  font-size: var(--button-font-size);
+  outline: 0;
+  outline-style: none;
+  padding: var(--base-padding);
+}
+
+button .material-icons {
+  color: var(--base-colour-foreground);
+  font-size: var(--button-icon-size);
+  vertical-align: middle;
+}
+
+.groupedButton button:not(:last-of-type) {
+  margin-right: -5px;
+}
+
+input {
+  background-color: var(--input-background-colour);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-size: var(--input-font-size);
+  outline: 0;
+  outline-style: none;
+  padding: var(--base-padding);
+}
+
+input:focus {
+  box-shadow: none;
+}
+
+.wrappedInput {
+  background-color: var(--input-background-colour);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  display: inline-block;
+  outline: 0;
+  padding: 0;
+}
+
+/** Focus within means that if a child element is focused, apply this style. */
+.wrappedInput:focus-within {
+  border: var(--border-focus);
+  box-shadow: var(--box-shadow);
+}
+
+.wrappedInput input {
+  border: 0;
+  padding: var(--base-padding-top) var(--base-padding-side) var(--base-padding-top) 0;
+}
+
+.wrappedInput .wrappedInputIcons {  
+  display: inline-block;
+  padding: 0 var(--base-padding-side);
+}
+
+.wrappedInput .wrappedInputIcons .material-icons {
+  color: var(--base-colour-foreground);
+  cursor: pointer;
+  font-size: var(--input-icon-size);
+  vertical-align: middle;
+}
+
+.tabs {
+  background-color: var(--base-colour-background-secondary);
+  margin: 0;
+  padding: 0;
+}
+
+.tab {  
+  border-right: 1px solid var(--base-colour-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  display: inline-block;
+  font-size: var(--button-font-size);  
+  padding: var(--tab-padding);  
+  margin-right: -4px;
+}
+
+.tab.active {
+  background-color: var(--base-colour-background-primary);    
+}
+
+.tab .material-icons {
+  font-size: var(--tab-icon-size);
+  margin-left: var(--tab-icon-padding);
+  padding: 0.1rem;
+  vertical-align: middle;
+}
+
+.tab .material-icons:hover {
+  color: var(--base-colour-focus);
+}
+
+.tab.newTab {
+ border: 0;
+}
+
+.tab.newTab .material-icons {
+  font-size: var(--tab-icon-size);
+  padding-left: 0;
+  vertical-align: middle;
+}
+
+.menu {
+  border: var(--border);
+  box-shadow: var(--box-shadow);
+  display:flex;
+  flex-direction: column;
+  margin: var(--base-padding-top);
+  width: fit-content;
+}
+
+.menuDivider {
+  height: 1px;
+  background-color: var(--border-colour);
+  border: 0;
+  margin: 5px 0;
+}
+
+.menuItem {
+  align-items: center;
+  display: flex;  
+  flex-direction: row;
+  margin: var(--base-padding-top)
+}
+
+.menuItem:hover {
+  background-color: var(--base-colour-background-secondary);
+  cursor: default;
+}
+
+.menuItem.inlineControls {
+  border-top: var(--border);
+  border-bottom: var(--border);
+}
+.menuItem.inlineControls:hover {
+  background-color: initial;
+}
+
+.menuItem.inlineControls .control {
+  background-color: var(--base-colour-background-primary);    
+  border: 0;
+  border-left: var(--border);
+  font-size: var(--menu-button-font-size);
+  padding: var(--base-padding);
+}
+
+.menuItem.inlineControls button:hover {
+  background-color: var(--base-colour-background-secondary);
+}
+
+.menuItem.inlineControls button:focus {
+  box-shadow: none;
+}
+
+.menuItem span.material-icons {
+  width: calc(var(--menu-font-size) * 2);
+}
+
+.menuItem span.material-icons.rightIcon {
+  width: fit-content;  
+}
+
+.menuItemContent {
+  align-items: center;
+  display: flex;
+  flex: 1;
+}
+
+.menuItemContent .inlineControlsLabel {
+  flex: 1;
+}

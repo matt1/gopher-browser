@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="components.css" />
+    <title>Gopher Browser GUI Components</title>
+  </head>
+  <body>
+    <h1>UI Components</h1>
+
+    <h2>Button</h2>
+    <a name="button">
+    <button>Example</button>
+    <button><span class="material-icons">settings</span></button>
+    <button>Settings <span class="material-icons">settings</span></button>
+
+    <h2>Grouped Button</h2>
+    <a name="grouped-button">
+    <div class="groupedButton">
+      <button><span class="material-icons">arrow_back</span></button>
+      <button><span class="material-icons">arrow_forward</span></button>
+    </div>
+    <br>
+    <div class="groupedButton">
+      <button><span class="material-icons">arrow_back</span>Back</button>
+      <button><span class="material-icons">refresh</span></button>
+      <button>Forward<span class="material-icons">arrow_forward</span></button>
+    </div>
+    
+    <h2>Input</h2>
+    <a name="input">
+    <input placeholder="plain input">
+
+    <div class="wrappedInput">
+      <div class="wrappedInputIcons">
+        <span class="material-icons">lock_open</span>
+        <span class="material-icons">settings</span>
+      </div>
+      <input placeholder="wrapped input">
+      <div class="wrappedInputIcons">
+        <span class="material-icons">star</span>
+      </div> 
+    </div>
+
+    <h2>Tabs</h2>
+    <a name="tabs">
+
+    <ul class="tabs">
+      <li class="tab">Tab 1<span class="material-icons">close</span></li>
+      <li class="tab active">Tab 2<span class="material-icons">close</span></li>
+      <li class="tab">Tab 3<span class="material-icons">close</span></li>
+      <li class="tab">Tab 4<span class="material-icons">close</span></li>
+      <li class="tab newTab"><span class="material-icons">add</span></li>
+    </ul>
+
+    <h2>Menu</h2>
+    <a name="menu">
+      <button>Click for menu</button>
+
+      <div class="menu">
+        <div class="menuItem">
+          <span class="material-icons leftIcon">info_outline</span>
+          <div class="menuItemContent">
+            Lorem ipsum blah blah blah blah blah
+          </div>
+        </div>
+        <div class="menuItem">
+          <span class="material-icons leftIcon">shower</span>
+          <div class="menuItemContent">
+            Item 2
+          </div>
+        </div>
+        <div class="menuItem">
+          <span class="material-icons leftIcon">pets</span>
+          <div class="menuItemContent">
+            Submenu
+          </div>
+          <span class="material-icons rightIcon">navigate_next</span>
+        </div>        
+        <div class="menuItem">
+          <span class="material-icons leftIcon"></span>
+          <div class="menuItemContent">
+            Item 3
+          </div>
+        </div>
+        <div class="menuItem inlineControls">
+          <span class="material-icons leftIcon"></span>
+          <div class="menuItemContent">
+            <div class="inlineControlsLabel">
+              Edit
+            </div>
+            <button class="control"><span class="material-icons">content_cut</span></button>
+            <button class="control"><span class="material-icons">content_copy</span></button>
+            <button class="control"><span class="material-icons">content_paste</span></button>            
+          </div>
+        </div>
+        <div class="menuItem inlineControls">
+          <span class="material-icons leftIcon"></span>
+          <div class="menuItemContent">
+            <div class="inlineControlsLabel">
+              Zoom
+            </div>
+            <button class="control"><span class="material-icons">zoom_in</span></button>
+            <div class="control">100%</div>
+            <button class="control"><span class="material-icons">zoom_out</span></button>
+            <button class="control"><span class="material-icons">fullscreen</span></button>
+          </div>
+        </div>        
+        <div class="menuItem">
+          <span class="material-icons leftIcon"></span>
+          <div class="menuItemContent">
+            Item 4
+          </div>
+        </div>
+        <div class="menuItem">
+          <span class="material-icons leftIcon"></span>
+          <div class="menuItemContent">
+            Item 5
+          </div>
+        </div>        
+        <div class="menuDivider"></div>
+        <div class="menuItem">
+          <span class="material-icons leftIcon">help_outline</span>
+          <div class="menuItemContent">
+            Item 4
+          </div>
+        </div> 
+      </div>
+  </body>
+</html>
