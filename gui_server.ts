@@ -57,20 +57,26 @@ export class GuiServer {
   async serve() {
     console.log(`Starting server on :${PORT}`);
 
-    for await (const request of this.server) {
-      let file = request.url;
-      if (request.method === "POST") {
-        if (request.url.indexOf('/api/') > -1) {
-          this.serveApi(request);
+    while (true) {
+      try {
+        for await (const request of this.server) {
+          let file = request.url;
+          if (request.method === "POST") {
+            if (request.url.indexOf('/api/') > -1) {
+              this.serveApi(request);
+            }
+          } else if (request.method === "GET") {
+            try {
+              if (request.url === '/') file = '/index.html';
+              let path = `./gui/build${file}`;
+              request.respond({status: 200, body: await Deno.readFile(path)});        
+            } catch (e){
+              request.respond({status: 400, body: `400 Bad Request: ${e}`});
+            }
+          }
         }
-      } else if (request.method === "GET") {
-        try {
-          if (request.url === '/') file = '/index.html';
-          let path = `./gui/build${file}`;
-          request.respond({status: 200, body: await Deno.readFile(path)});        
-        } catch (e){
-          request.respond({status: 400, body: `400 Bad Request: ${e}`});
-        }
+      } catch (error) {
+        console.warn(error);
       }
     }
   }

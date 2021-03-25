@@ -13,7 +13,7 @@ export class StatusPage extends Component<GopherTabProps, {}> {
   render() {
     return (
       <div className="statusPage">
-        <p>Status page</p>
+        {this.props.error}
       </div>
     );
   }

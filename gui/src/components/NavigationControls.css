@@ -1,9 +1,13 @@
 .navigationControls {
-  grid-area: header-grid;
+  background: #f7f7f7;
+  border-bottom: 1px solid #d3d3d3;
   display: grid;
+  grid-area: header-grid;
+  grid-column-gap: 10px;
   grid-template-columns: max-content auto max-content;
   grid-template-rows: 1fr;
   grid-template-areas: "left-grid middle-grid right-grid";
+  padding: 4px;
 }
 
 .left {

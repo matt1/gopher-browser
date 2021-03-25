@@ -3,13 +3,16 @@ import {GopherContent} from './GopherContent';
 import {NavigationControls} from './NavigationControls';
 import {StatusBar} from './StatusBar';
 import './GopherTab.css';
+import { StatusPage } from './StatusPage';
 
 export class EventHandlers {
   onNavigate?: (selector:GopherSelector) => void;
+  onStop?:() => void;
   onScroll?: (scroll:number) => void;
   onSearch?:(selector:GopherSelector) => void;
   onStatus?:(status:string) => void;
   onBack?: () => void;
+  onForward?: () => void;
 }
 
 export class GopherSelector extends EventHandlers {
@@ -60,6 +63,9 @@ export class GopherTabState {
   /** Status bar message. */
   status?:string = '';
 
+  /** contains any error message from the GUI server. */
+  error?:string = '';
+
   /** History items */
   history?: Array<HistoryFrame> = [];
 
@@ -79,6 +85,9 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
   /** Flag used to indicate that the page is loading. **/
   private loading = false;
 
+  /** Used to stop fetches. */
+  private abortController = new AbortController();
+
   constructor(props:GopherTabProps) {
     super(props);
     this.state = {
@@ -92,7 +101,14 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     };
     this.setState(this.state);
 
+    this.onStop = this.onStop.bind(this);
     this.onBack = this.onBack.bind(this);
+    this.onForward = this.onForward.bind(this);
+  }
+
+  onStop() {
+    console.log('onStop');
+    this.abortController.abort();
   }
 
   onBack() {
@@ -100,14 +116,31 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     let shadowHistoryPointer = this.state.historyPointer || 0;
     const newPointer = Math.max(shadowHistoryPointer - 1, 0);
     const historyItem = this.state.history[newPointer];
+    if (!historyItem) return;
     this.setState({
       bytes: new Uint8Array(),
       historyPointer: newPointer,
-      scrollPos: historyItem.scrollPos,
+      scrollPos: historyItem?.scrollPos ,
     })
     
     this._navigate(historyItem.selector);
   }
+
+  onForward() {
+    if (!this.state.history) throw new Error('No history in state.');
+    let shadowHistoryPointer = (this.state.historyPointer || 0)! + 1;
+    if (shadowHistoryPointer > this.state.history.length) return;
+    const historyItem = this.state.history[shadowHistoryPointer];
+    if (!historyItem) return;
+    this.setState({
+      bytes: new Uint8Array(),
+      historyPointer: shadowHistoryPointer,
+      scrollPos: historyItem?.scrollPos,
+    })
+    
+    this._navigate(historyItem.selector);
+  }
+
 
   /** Performs a "normal" navigation and adds new element to the history. */
   onNavigate(selector:GopherSelector) {
@@ -116,9 +149,11 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     if (this.state.history) {
       historySoFar = this.state.history.slice(0, shadowHistoryPointer + 1);
     }
+    // Update current frame with last scroll position before we leave
     if (historySoFar.length > 0) {
       historySoFar[historySoFar.length - 1].scrollPos = this.state.scrollPos || 0;
     }
+
     const history = historySoFar.concat([new HistoryFrame(selector, 0)]);
     this.setState({
       scrollPos: 0,
@@ -132,6 +167,8 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
   }
 
   _navigate(selector:GopherSelector) {
+    this.abortController.abort();
+    this.abortController = new AbortController();
     const host = document.location.hostname;
     let path = `http://${host}:7070/api/v1/downloadMenu`;
     if (selector.type !== '1') {
@@ -142,12 +179,14 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     }
 
     this.setState({
+      error: '',
       uri: selector.toString(),
       selector,
       status: `Waiting for ${selector.hostname}...`,
     });
 
     fetch(path, {
+      signal: this.abortController.signal,
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(selector),
@@ -155,8 +194,11 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
       if (!response.ok) {
         // TODO: proper error handling
         response.text().then((errorMessage) => {
-          alert(`Request failed:\n${errorMessage}`);
-          this.setState({status: ''});   
+          
+          this.setState({
+            error: errorMessage,
+            status: ''
+          });
         });
       } else {
         return response.arrayBuffer();
@@ -200,11 +242,27 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
   }
 
   onScroll(scrollPos:number) {
-    // todo: request animation frame?
     this.setState({scrollPos});
   }
   
   render() {
+
+    let content;
+    if (!this.state.error) {
+      content = <GopherContent 
+        onNavigate={(selector:GopherSelector) => this.onNavigate(selector)}
+        onScroll={(scroll:number) => this.onScroll(scroll)}
+        onSearch={(selector:GopherSelector) => this.onSearch(selector)}
+        onStatus={(status:string) => this.onStatus(status)}
+        bytes={this.state.bytes}
+        selector={this.state.selector}
+        scrollPos={this.state.scrollPos}>
+      </GopherContent>
+    } else {
+      content = <StatusPage
+        error={this.state.error}></StatusPage>
+    }
+
     return (
       <div className="gopherTab grid">
         {/* TODO parse the URL */ }
@@ -212,18 +270,12 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
           history={this.state.history}
           historyPointer={this.state.historyPointer}
           onBack={this.onBack}
+          onForward={this.onForward}
+          onStop={this.onStop}
           uri={this.state.uri}
           onNavigate={(selector:GopherSelector) => this.onNavigate(selector)}>
         </NavigationControls>
-        <GopherContent 
-          onNavigate={(selector:GopherSelector) => this.onNavigate(selector)}
-          onScroll={(scroll:number) => this.onScroll(scroll)}
-          onSearch={(selector:GopherSelector) => this.onSearch(selector)}
-          onStatus={(status:string) => this.onStatus(status)}
-          bytes={this.state.bytes}
-          selector={this.state.selector}
-          scrollPos={this.state.scrollPos}>
-        </GopherContent>
+        {content}
         <StatusBar status={this.state.status}></StatusBar>
       </div>
     );

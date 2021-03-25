@@ -83,6 +83,16 @@ button .material-icons {
   vertical-align: middle;
 }
 
+button.flatButton {
+  border: 0;
+  background-color: transparent;
+}
+
+button.flatButton:hover, button.flatButton:focus {
+  background-color: var(--base-colour-background-secondary);
+  box-shadow: none;
+}
+
 .groupedButton button:not(:last-of-type) {
   margin-right: -5px;
 }
@@ -179,8 +189,17 @@ input:focus {
   box-shadow: var(--box-shadow);
   display:flex;
   flex-direction: column;
-  margin: var(--base-padding-top);
+  margin: var(--base-padding-top);  
   width: fit-content;
+
+  visibility: hidden;
+  position: absolute;
+  display: none;
+}
+
+.menuTrigger:focus-within > .menu{
+  visibility: visible;  
+  display: block;
 }
 
 .menuDivider {

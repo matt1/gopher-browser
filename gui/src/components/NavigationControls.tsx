@@ -18,6 +18,10 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     }
     this.lastUri = this.props.uri;
     this.onBack = this.onBack.bind(this);
+    this.backDisabled = this.backDisabled.bind(this);
+    this.onForward = this.onForward.bind(this);
+    this.forwardDisabled = this.forwardDisabled.bind(this);
+    this.onStop = this.onStop.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
   }
@@ -41,12 +45,34 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     }
   }
 
+  backDisabled(): boolean {
+    if (!this.props.history || this.props.historyPointer === undefined) return true;
+    if (this.props.historyPointer === 0) return true;
+    return false;
+  }
+
   onBack() {
     if (this.props.onBack) {
       this.props.onBack();
     } else {
       throw new Error('No onBack function in props.');
     }
+  }
+
+  forwardDisabled():boolean {
+    if (!this.props.history || this.props.historyPointer === undefined) return true;
+    if (this.props.historyPointer > this.props.history.length) return true;
+    return false;
+  }
+
+  onForward() {
+    if (!this.props.onForward) throw new Error('No onForward function in props');
+    this.props.onForward();
+  }
+
+  onStop(){
+    if (!this.props.onStop) throw new Error('No onStop function in props');
+    this.props.onStop();
   }
 
   parseUri(uri:string):GopherSelector {
@@ -85,11 +111,15 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     return (
       <div className="navigationControls">
         <div className="left">
-          <button onClick={this.onBack}>Back</button>
+          <button className="flatButton" disabled={this.backDisabled()} onClick={this.onBack} title="Click to go back">
+            <span className="material-icons">arrow_back</span>
+          </button>
+          <button className="flatButton" disabled={this.forwardDisabled()} onClick={this.onForward} title="Click to go forward">
+            <span className="material-icons">arrow_forward</span>
+          </button>          
         </div>
         <div className="address middle">
           <input id="uri" onChange={this.onChange} onKeyDown={this.onKeyDown} value={this.state.uri}></input>
-          <button onClick={() => this.onNavigate(this.state.uri!)}>Go</button>
         </div>
         <div className="right"></div>
       </div>

@@ -45,6 +45,7 @@ export class Gopher {
         port,
       });
     } catch (error) {
+      console.warn(error);
       throw error;
     }
 

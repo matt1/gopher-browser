@@ -1,6 +1,5 @@
 .gopherTab.grid {
   display: grid;
-  gap: 5px;
   grid-template-columns: 1fr;
   grid-template-rows: max-content auto;
   grid-template-areas: "header-grid"

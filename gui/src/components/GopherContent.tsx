@@ -12,23 +12,25 @@ import { GopherSearch } from './GopherSearch';
 
 /** This component is responsible for "rendering" the gopher content. */
 export class GopherContent extends Component<GopherTabProps, {}> {  
-  /** Cache last position we were told to scroll to. */
-  private lastScrollPos:number = 0;
-  
-  private scrollTimeout!:any;
-  private scrollInterval: number = 500;
-
   /** Reference to content `div` - this allows us to manually scroll it etc. */
   contentRef:React.RefObject<HTMLElement>;
   
+  /** 
+   * Copy of the last bytes we had so we can detect page navigation when props
+   * change.
+   */
+  private lastBytes!:Uint8Array;
+
   constructor(props:GopherTabProps) {
     super(props);
-    this.lastScrollPos = this.props.scrollPos || 0;
     this.contentRef = React.createRef();
-    this.onScroll = this.onScroll.bind(this);
   }
 
-  onNavigate(selector:GopherSelector) {
+  async onNavigate(selector:GopherSelector) {
+    if (this.props.onScroll) {
+      const pos = this.contentRef.current?.scrollTop || 0;
+      await this.props.onScroll(pos);
+    }
     if (this.props.onNavigate) {
       this.props.onNavigate(selector);
     } else {
@@ -44,21 +46,13 @@ export class GopherContent extends Component<GopherTabProps, {}> {
     if (this.props.onSearch) this.props.onSearch(selector);
   }
 
-  onScroll() {
-    if (!this.contentRef) return;
-  
-    // Debounce updates to prevent jank on big pages.
-    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
-    this.scrollTimeout = setTimeout(() => {
-      if (this.props.onScroll) this.props.onScroll(this.contentRef.current?.scrollTop || 0);
-    }, 50);
-    
-  }
+  componentDidUpdate() {
 
-  componentDidUpdate() {    
-    if ((this.props.scrollPos !== this.lastScrollPos) || (this.contentRef.current?.scrollTop !== this.lastScrollPos)) {
-      this.lastScrollPos = this.props.scrollPos || 0;
-      this.contentRef.current?.scrollTo({top: this.lastScrollPos});
+    // keep track of the bytes - if they change we know we have navigated and so
+    // we should set the scroll position.
+    if (this.props.bytes && this.props.bytes.length > 0 && this.lastBytes !== this.props.bytes) {
+      this.lastBytes = this.props.bytes;
+      this.contentRef.current?.scrollTo({top: this.props.scrollPos || 0});
     }
   }
 
@@ -144,7 +138,6 @@ export class GopherContent extends Component<GopherTabProps, {}> {
 
     return React.createElement('div', {
       ref: this.contentRef,
-      onScroll: this.onScroll,
       className: 'gopherContent',
     }, items);
   }
