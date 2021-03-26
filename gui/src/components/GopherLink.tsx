@@ -22,7 +22,7 @@ export class GopherLink extends Component<GopherSelector, {}> {
 
   onStatus() {
     if (!this.props.onStatus) throw new Error('No onStatus in props.');
-    if (!this.props.hostname) throw new Error('No hostname in props.');
+    if (!this.props.hostname) {console.warn('No hostname in props.'); return;}
     let url = this.props.hostname;
     if (this.props.port !== 70) {
       url += ':70';

@@ -23,7 +23,6 @@
   grid-area: right-grid;
 }
 
-
-.address input {
-  width: 90%;
+.address .gopherAutocomplete {
+  width: 100%;
 }

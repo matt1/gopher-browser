@@ -1,6 +1,7 @@
 import React, {ChangeEvent, Component} from 'react';
 import './NavigationControls.css';
 import {GopherSelector, GopherTabProps, GopherTabState} from './GopherTab';
+import {GopherAutocomplete} from './GopherAutocomplete';
 
 
 /** Regular expression used for parsing URIs */ // eslint-disable-next-line
@@ -11,7 +12,7 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
   
   private lastUri:string | undefined;
 
-  constructor(props:GopherTabProps) {
+  constructor(props:any) {
     super(props);
     this.state = {
       uri: this.props.uri,
@@ -70,7 +71,7 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     this.props.onForward();
   }
 
-  onStop(){
+  onStop() {
     if (!this.props.onStop) throw new Error('No onStop function in props');
     this.props.onStop();
   }
@@ -98,7 +99,7 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     } else {
       throw new Error('No onNavigate function in props.');
     }
-  }
+  }  
 
   render() {
     // compare the last URI we got from props - it will only be different from
@@ -107,6 +108,12 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
       this.lastUri = this.props.uri;
       this.setState({uri: this.lastUri});
     }
+
+    //     <input
+    //     onChange={this.onChange}
+    //     onKeyDown={this.onKeyDown}
+    //     value={this.state.uri}
+    // ></input>
 
     return (
       <div className="navigationControls">
@@ -119,7 +126,14 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
           </button>          
         </div>
         <div className="address middle">
-          <input id="uri" onChange={this.onChange} onKeyDown={this.onKeyDown} value={this.state.uri}></input>
+
+          <GopherAutocomplete
+              suggestions={this.props.history?.map(frame => frame.selector)}
+              onChange={this.onChange}
+              onNavigate={(uri:string) => this.onNavigate(uri)}
+              uri={this.state.uri}>
+              
+          </GopherAutocomplete>
         </div>
         <div className="right"></div>
       </div>

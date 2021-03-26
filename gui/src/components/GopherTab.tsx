@@ -106,6 +106,12 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
     this.onForward = this.onForward.bind(this);
   }
 
+  componentDidCatch(error:Error, errorInfo:any) {
+   console.warn('Error from child component.');
+   console.warn(errorInfo);
+   console.warn(error);
+  }
+
   onStop() {
     console.log('onStop');
     this.abortController.abort();
