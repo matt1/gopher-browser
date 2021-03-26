@@ -277,6 +277,7 @@ export class GopherTab extends Component<GopherTabProps, GopherTabState> {
           historyPointer={this.state.historyPointer}
           onBack={this.onBack}
           onForward={this.onForward}
+          onSearch={(selector:GopherSelector) => this.onSearch(selector)}
           onStop={this.onStop}
           uri={this.state.uri}
           onNavigate={(selector:GopherSelector) => this.onNavigate(selector)}>

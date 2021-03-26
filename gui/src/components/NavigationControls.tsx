@@ -4,8 +4,16 @@ import {GopherSelector, GopherTabProps, GopherTabState} from './GopherTab';
 import {GopherAutocomplete} from './GopherAutocomplete';
 
 
-/** Regular expression used for parsing URIs */ // eslint-disable-next-line
-const URI_REGEX = /^(gopher:\/\/){0,1}([\w\-_\.]+)(?::(\d+)){0,1}(?:(?:\/)|([\/!].+){0,1})$/;
+/** 
+ * Regular expression used for parsing URIs
+ * 
+ * Group 1 - scheme (i.e. `gopher://`)
+ * Group 2 - host
+ * Group 3 - port
+ * Group 4 - selector
+ */
+// eslint-disable-next-line
+const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?=true]*)/;
 
 /** Contains controls for navigating */
 export class NavigationControls extends Component<GopherTabProps, GopherTabState> {
@@ -76,6 +84,10 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     this.props.onStop();
   }
 
+  isGopherUri(uri:string):boolean {
+    return URI_REGEX.test(uri);
+  }
+
   parseUri(uri:string):GopherSelector {
     const matches = uri.match(URI_REGEX);
     const selector = new GopherSelector();
@@ -92,14 +104,29 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
   }
 
   onNavigate(uri:string) {
-    if (this.props.onNavigate) {
-      const selector = this.parseUri(uri);
-      selector.type = this.props.address?.type! || '1';
-      this.props.onNavigate(selector);
-    } else {
-      throw new Error('No onNavigate function in props.');
+    if (!this.props.onNavigate) throw new Error('No onNavigate function in props.');
+
+    if (!this.isGopherUri(uri)) {
+      // Not a valid URL - try searching instead.
+      this.onSearch(uri);
+      return;
     }
-  }  
+
+    const selector = this.parseUri(uri);
+    selector.type = this.props.address?.type! || '1';
+    this.props.onNavigate(selector);
+  }
+
+  onSearch(query:string) {
+    if (!this.props.onSearch) throw new Error('No onSearch function in props.');
+    // TODO: don't hardcode floodgap - allow different engines.
+    const selector = new GopherSelector();
+    selector.hostname = 'gopher.floodgap.com';
+    selector.port = 70;
+    selector.selector = '/v2/vs';
+    selector.query = query;
+    this.props.onSearch(selector);
+  }
 
   render() {
     // compare the last URI we got from props - it will only be different from
@@ -108,12 +135,6 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
       this.lastUri = this.props.uri;
       this.setState({uri: this.lastUri});
     }
-
-    //     <input
-    //     onChange={this.onChange}
-    //     onKeyDown={this.onKeyDown}
-    //     value={this.state.uri}
-    // ></input>
 
     return (
       <div className="navigationControls">
