@@ -3,18 +3,6 @@ import './NavigationControls.css';
 import {GopherSelector, GopherTabProps, GopherTabState} from './GopherTab';
 import {GopherAutocomplete} from './GopherAutocomplete';
 
-
-/** 
- * Regular expression used for parsing URIs
- * 
- * Group 1 - scheme (i.e. `gopher://`)
- * Group 2 - host
- * Group 3 - port
- * Group 4 - selector
- */
-// eslint-disable-next-line
-const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?\.]*)/;
-
 export enum SuggestionType {
   URI,
   HISTORY,
@@ -103,36 +91,8 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     this.props.onStop();
   }
 
-  isGopherUri(uri:string):boolean {
-    return URI_REGEX.test(uri);
-  }
-
-  parseUri(uri:string):GopherSelector {
-    const matches = uri.match(URI_REGEX);
-    const selector = new GopherSelector();
-    if (!matches) {
-      throw new Error(`URI of '${uri}' appears to be invalid`);
-    }
-    if (matches[1] && matches[1].length > 0 && matches[1] !== 'gopher://') {
-      throw new Error('Only gopher:// address supported.');
-    }
-    selector.hostname = matches[2];
-    if (matches.length >= 3) selector.port = Number.parseInt(matches[3]) || 70;
-    if (matches.length >= 4) selector.selector = matches[4];
-    return selector;
-  }
-
-  onNavigate(uri:string, type = '1') {
+  onNavigate(selector:GopherSelector) {
     if (!this.props.onNavigate) throw new Error('No onNavigate function in props.');
-
-    if (!this.isGopherUri(uri)) {
-      // Not a valid URL - try searching instead.
-      this.onSearch(uri);
-      return;
-    }
-
-    const selector = this.parseUri(uri);
-    selector.type = type || this.props.address?.type! || '1';
     this.props.onNavigate(selector);
   }
 
@@ -174,7 +134,8 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
                 return sug;
               })}
               onChange={this.onChange}
-              onNavigate={(uri:string, type:string|undefined) => this.onNavigate(uri, type)}
+              onSearch={(query:string) => this.onSearch(query)}
+              onNavigate={(selector:GopherSelector) => this.onNavigate(selector)}
               uri={this.state.uri}>
               
           </GopherAutocomplete>

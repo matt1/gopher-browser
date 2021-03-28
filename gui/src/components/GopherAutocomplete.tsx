@@ -3,6 +3,17 @@ import './GopherAutocomplete.css';
 import { GopherSelector, HistoryFrame } from './GopherTab';
 import { Suggestion, SuggestionType } from './NavigationControls';
 
+/** 
+ * Regular expression used for parsing URIs
+ * 
+ * Group 1 - scheme (i.e. `gopher://`)
+ * Group 2 - host
+ * Group 3 - port
+ * Group 4 - selector
+ */
+// eslint-disable-next-line
+const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?\.]*)/;
+
 
 export class GopherAutocompleteState {
   activeSuggestion:number = 0;
@@ -14,7 +25,8 @@ export class GopherAutocompleteState {
 
 export class GopherAutocompleteProps {
   onChange?: (event:ChangeEvent<HTMLInputElement>) => void;
-  onNavigate?: (uri:string, type:string|undefined) => void;
+  onNavigate?: (selector:GopherSelector) => void;
+  onSearch?: (query:string) => void;
   history?:Array<HistoryFrame>|undefined = [];
   suggestions?:Array<Suggestion>|undefined = [];
   uri:string|undefined = '';
@@ -47,6 +59,25 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
     this.onKeyDown = this.onKeyDown.bind(this);
 
     this.inputRef = React.createRef();
+  }
+
+  parseUri(uri:string):GopherSelector {
+    const matches = uri.match(URI_REGEX);
+    const selector = new GopherSelector();
+    if (!matches) {
+      throw new Error(`URI of '${uri}' appears to be invalid`);
+    }
+    if (matches[1] && matches[1].length > 0 && matches[1] !== 'gopher://') {
+      throw new Error('Only gopher:// address supported.');
+    }
+    selector.hostname = matches[2];
+    if (matches.length >= 3) selector.port = Number.parseInt(matches[3]) || 70;
+    if (matches.length >= 4) selector.selector = matches[4];
+    return selector;
+  }
+
+  isGopherUri(uri:string):boolean {
+    return URI_REGEX.test(uri);
   }
 
   onChange(event:ChangeEvent<HTMLInputElement>){
@@ -96,7 +127,21 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
       activeSuggestion: 0,
       showSuggestions: false,
     });
-    this.props.onNavigate(uri, type);
+
+    if (!this.isGopherUri(uri)) {
+      // Not a valid URL - try searching instead.
+      this.onSearch(uri);
+      return;
+    }
+
+    const selector = this.parseUri(uri);
+    selector.type = type || '1';
+    this.props.onNavigate(selector);
+  }
+
+  onSearch(query:string) {
+    if (!this.props.onSearch) throw new Error('No onSearch function in props.');
+    this.props.onSearch(query);
   }
 
   onKeyDown(event:React.KeyboardEvent) {
