@@ -13,7 +13,26 @@ import {GopherAutocomplete} from './GopherAutocomplete';
  * Group 4 - selector
  */
 // eslint-disable-next-line
-const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?=true]*)/;
+const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?\.]*)/;
+
+export enum SuggestionType {
+  URI,
+  HISTORY,
+  SEARCH
+}
+
+/** Suggestion for auto-complete. */
+export class Suggestion {
+  query:string = '';
+  suggestionType?:SuggestionType;
+  
+  constructor(readonly selector?:GopherSelector){}
+
+  toString():string {
+    if (this.selector) return this.selector.toString();
+    return this.query;
+  }
+}
 
 /** Contains controls for navigating */
 export class NavigationControls extends Component<GopherTabProps, GopherTabState> {
@@ -103,7 +122,7 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     return selector;
   }
 
-  onNavigate(uri:string) {
+  onNavigate(uri:string, type = '1') {
     if (!this.props.onNavigate) throw new Error('No onNavigate function in props.');
 
     if (!this.isGopherUri(uri)) {
@@ -113,7 +132,7 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
     }
 
     const selector = this.parseUri(uri);
-    selector.type = this.props.address?.type! || '1';
+    selector.type = type || this.props.address?.type! || '1';
     this.props.onNavigate(selector);
   }
 
@@ -149,9 +168,13 @@ export class NavigationControls extends Component<GopherTabProps, GopherTabState
         <div className="address middle">
 
           <GopherAutocomplete
-              suggestions={this.props.history?.map(frame => frame.selector)}
+              suggestions={this.props.history?.map(frame => {
+                const sug = new Suggestion(frame.selector);
+                sug.suggestionType = SuggestionType.HISTORY;
+                return sug;
+              })}
               onChange={this.onChange}
-              onNavigate={(uri:string) => this.onNavigate(uri)}
+              onNavigate={(uri:string, type:string|undefined) => this.onNavigate(uri, type)}
               uri={this.state.uri}>
               
           </GopherAutocomplete>

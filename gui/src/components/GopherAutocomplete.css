@@ -30,6 +30,12 @@ ul.suggestions li {
   border-left: 5px solid transparent;
 }
 
+ul.suggestions li .material-icons {
+  font-size: 1.2rem;
+  vertical-align: middle;
+  padding: 0 0.5rem 0 0;
+}
+
 .suggestion-active,
 .suggestions li:hover {
   border-left: 5px solid #1e88e5;

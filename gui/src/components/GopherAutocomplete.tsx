@@ -1,16 +1,12 @@
 import React, {ChangeEvent, Component} from 'react';
 import './GopherAutocomplete.css';
-import { GopherSelector } from './GopherTab';
+import { GopherSelector, HistoryFrame } from './GopherTab';
+import { Suggestion, SuggestionType } from './NavigationControls';
 
 
-/**
- * Autocomplete input for gopher address bar.
- * 
- * Based on https://www.digitalocean.com/community/tutorials/react-react-autocomplete
- */
 export class GopherAutocompleteState {
   activeSuggestion:number = 0;
-  filteredSuggestions:Array<GopherSelector> = [];
+  filteredSuggestions:Array<Suggestion> = [];
   showSuggestions:boolean = false;
   userInput:GopherSelector|undefined;
   uri:string|undefined = '';
@@ -18,11 +14,17 @@ export class GopherAutocompleteState {
 
 export class GopherAutocompleteProps {
   onChange?: (event:ChangeEvent<HTMLInputElement>) => void;
-  onNavigate?: (uri:string) => void;
-  suggestions:Array<GopherSelector>|undefined = [];
+  onNavigate?: (uri:string, type:string|undefined) => void;
+  history?:Array<HistoryFrame>|undefined = [];
+  suggestions?:Array<Suggestion>|undefined = [];
   uri:string|undefined = '';
 }
 
+/**
+ * Autocomplete input for gopher address bar.
+ * 
+ * Based on https://www.digitalocean.com/community/tutorials/react-react-autocomplete
+ */
 export class GopherAutocomplete extends Component<GopherAutocompleteProps, GopherAutocompleteState>  {
   
   /** Reference for the main input box, so we can dynamically position suggestions. */
@@ -49,13 +51,24 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
 
   onChange(event:ChangeEvent<HTMLInputElement>){
     if (!event || !event.currentTarget) return;
-    if (!this.props.suggestions) return;
     const userInput = (event.currentTarget as HTMLInputElement).value;
   
-    const filteredSuggestions = this.props.suggestions.filter((suggestion:GopherSelector) =>
-        suggestion.toString().toLowerCase().indexOf(userInput.toLowerCase()) > -1
-    );
+    let filteredSuggestions:Array<Suggestion> = [];
+    
+    if (this.props.suggestions) {
+        filteredSuggestions = (this.props.suggestions.filter((suggestion:Suggestion) => 
+          suggestion.selector!.toString().toLowerCase().indexOf(userInput.toLowerCase()) > -1
+        ));
+    }
   
+    // TODO: only show search suggestion if not a valid gopher URI
+    const queryTerm = new Suggestion();
+    queryTerm.suggestionType = SuggestionType.SEARCH;
+    queryTerm.query = userInput
+
+    // Todo remove "duplicate" entries (might only happen in dev server hot reload?)
+    filteredSuggestions = [queryTerm, ...filteredSuggestions];
+
     this.setState({
       activeSuggestion: 0,
       filteredSuggestions,
@@ -66,22 +79,24 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
   };
 
   onClick(event:React.MouseEvent) {
+    const uri = (event.currentTarget.querySelector('.uri') as HTMLElement).innerText;
+    const type = (event.currentTarget.querySelector('.uri') as HTMLElement).dataset['type'];
     this.setState({
       activeSuggestion: 0,
       filteredSuggestions: [],
       showSuggestions: false,
-      userInput: (event.currentTarget as HTMLElement).innerText
+      userInput: uri,
     });
-    this.onNavigate((event.currentTarget as HTMLElement).innerText);
+    this.onNavigate(uri, type);
   };
 
-  onNavigate(uri:string) {
+  onNavigate(uri:string, type:string|undefined) {
     if (!this.props.onNavigate) throw new Error('no onNavigate in props');
     this.setState({
       activeSuggestion: 0,
       showSuggestions: false,
     });
-    this.props.onNavigate(uri);
+    this.props.onNavigate(uri, type);
   }
 
   onKeyDown(event:React.KeyboardEvent) {
@@ -90,12 +105,13 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
     // enter
     if (event.keyCode === 13) {
       const selected = filteredSuggestions[activeSuggestion]?.toString() || this.state.userInput?.toString() || '';
+      const type = filteredSuggestions[activeSuggestion]?.selector?.type || '1';
       this.setState({
         activeSuggestion: 0,
         showSuggestions: false,
         uri: selected,
       });
-      this.onNavigate(selected);
+      this.onNavigate(selected, type);
       
     } else if (event.keyCode === 38) {
       if (activeSuggestion === 0) {
@@ -165,9 +181,24 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
                 if (index === activeSuggestion) {
                   className = 'suggestion-active';
                 }
+                let iconName;
+                switch (suggestion.suggestionType) {
+                  case SuggestionType.HISTORY:
+                    iconName = 'history';
+                    break;
+                  case SuggestionType.SEARCH:
+                    iconName = 'search';
+                    break;
+                  default:
+                    iconName = 'language'; // a globe icon
+                }
+
                 return (
                   <li className={className} key={`${index}-${suggestion.toString()}`} onClick={onClick}>
-                    {suggestion.toString()}
+                    <span className="material-icons">{iconName}</span>
+                    <span className="uri" data-type={suggestion.selector?.type}>
+                      {suggestion.toString()}
+                    </span>
                   </li>
                 );
               })}
