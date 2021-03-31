@@ -4,15 +4,15 @@ import { GopherSelector, HistoryFrame } from './GopherTab';
 import { Suggestion, SuggestionType } from './NavigationControls';
 
 /** 
- * Regular expression used for parsing URIs
+ * Regular expression used for parsing URIs - todo use one from deno-gopher?
  * 
- * Group 1 - scheme (i.e. `gopher://`)
+ * Group 1 - scheme
  * Group 2 - host
  * Group 3 - port
  * Group 4 - selector
  */
 // eslint-disable-next-line
-const URI_REGEX = /^(gopher:\/\/)?((?:[\w\d-_]+\.)+(?:[\w]*))(?:\:([\d]+)){0,1}([/\w\d-_ !&?\.]*)/;
+const URI_REGEX = /^(?:(gopher|gophers):\/\/)?((?:[\w\d-_]*\.)+[\w\d]+)(?:\:([\d]+)){0,1}([/\w\d-_ !&?\.=#]*){0,1}$/
 
 
 export class GopherAutocompleteState {
@@ -67,12 +67,14 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
     if (!matches) {
       throw new Error(`URI of '${uri}' appears to be invalid`);
     }
-    if (matches[1] && matches[1].length > 0 && matches[1] !== 'gopher://') {
-      throw new Error('Only gopher:// address supported.');
+    if (matches[1] && matches[1].length > 0 && !(matches[1] === 'gopher' || matches[1] === 'gophers')) {
+      throw new Error('Only gopher:// or gophers:// addresses supported.');
     }
+    selector.scheme = matches[0] || 'gopher';
     selector.hostname = matches[2];
     if (matches.length >= 3) selector.port = Number.parseInt(matches[3]) || 70;
-    if (matches.length >= 4) selector.selector = matches[4];
+    // TODO: handle selectors that start with /0/blah etc
+    if (matches.length >= 4) selector.selector = matches[4];    
     return selector;
   }
 
@@ -82,23 +84,29 @@ export class GopherAutocomplete extends Component<GopherAutocompleteProps, Gophe
 
   onChange(event:ChangeEvent<HTMLInputElement>){
     if (!event || !event.currentTarget) return;
-    const userInput = (event.currentTarget as HTMLInputElement).value;
+    const userInput = (event.currentTarget as HTMLInputElement).value.trim();
   
     let filteredSuggestions:Array<Suggestion> = [];
     
+    // Todo remove "duplicate" entries (might only happen in dev server hot reload?)
     if (this.props.suggestions) {
         filteredSuggestions = (this.props.suggestions.filter((suggestion:Suggestion) => 
           suggestion.selector!.toString().toLowerCase().indexOf(userInput.toLowerCase()) > -1
         ));
     }
   
-    // TODO: only show search suggestion if not a valid gopher URI
-    const queryTerm = new Suggestion();
-    queryTerm.suggestionType = SuggestionType.SEARCH;
-    queryTerm.query = userInput
+    const interactiveSuggestion = new Suggestion();
+    if (!this.isGopherUri(userInput)) {
+      interactiveSuggestion.suggestionType = SuggestionType.SEARCH;
+      interactiveSuggestion.query = userInput
 
-    // Todo remove "duplicate" entries (might only happen in dev server hot reload?)
-    filteredSuggestions = [queryTerm, ...filteredSuggestions];
+      filteredSuggestions = [interactiveSuggestion, ...filteredSuggestions];
+    } else {
+      interactiveSuggestion.suggestionType = SuggestionType.URI;
+      interactiveSuggestion.query = userInput
+
+      filteredSuggestions = [interactiveSuggestion, ...filteredSuggestions];
+    }
 
     this.setState({
       activeSuggestion: 0,

@@ -19,6 +19,9 @@ export class GopherSelector extends EventHandlers {
   /** Single character indicating type of this selector. */
   type?:string = '';
 
+  /** Scheme for this selector - either gopher or gophers - no trailing `://` */
+  scheme?:string = 'gopher';
+
   hostname?:string = '';
 
   port?:number = 70;

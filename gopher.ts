@@ -32,9 +32,6 @@ export class Gopher {
 
 	/** Load a Gopher menu and return results. */
 	async loadMenu(hostname:string, port = 70, selector = ''): Promise<GopherResponse> {
-		// TODO: depending on selector type, return uint8array instead of json
-		// (e.g. for images or binary files).
-
 		console.log(`Downloading menu from gopher: ${hostname} ${port} ${selector}`);
     let menu;
     const start = Date.now();
